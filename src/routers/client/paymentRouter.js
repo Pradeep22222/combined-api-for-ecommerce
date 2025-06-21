@@ -2,6 +2,7 @@ import express from "express";
 import stripe from "stripe";
 import { userAuth } from "../../middlewares/client/authMiddleware.js";
 import { checkItemDetailsAndGetDimensions } from "../../models/common/itemModel/itemModel.js";
+import { calculateDeliveryFee } from "../../helpers/client/auPostAPI.js";
 
 const stripeInitiation = stripe(process.env.STRIPE_SECRET);
 const router = express.Router();
@@ -9,11 +10,11 @@ const router = express.Router();
 // GST rate
 const gstRate = 0.1;
 
-router.post("/", async (req, res, next) => {
+router.post("/",userAuth, async (req, res, next) => {
   try {
     const { products } = req.body;
     const fromPostCode = 6107; // Define your source post code
-    // const toPostCode = req.userInfo.address.postCode;
+    const toPostCode = req.userInfo.address.postCode;
 
     // Validate the products and get their dimensions asynchronously
     const validationResult = await checkItemDetailsAndGetDimensions(products);

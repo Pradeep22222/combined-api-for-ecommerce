@@ -8,7 +8,6 @@ router.post("/delivery-fee", async (req, res) => {
   try {
     const { fromPostcode, toPostcode, length, width, height, weight } =
       req.body;
-    console.log(fromPostcode, toPostcode, width, height, weight);
     if (
       !fromPostcode ||
       !toPostcode ||
@@ -47,6 +46,10 @@ router.post("/delivery-fee", async (req, res) => {
     }
 
     const services = serviceResponse.data.services.service;
+
+
+
+  
 
     // Picking the cheapest service
     const cheapestService = services.sort(
