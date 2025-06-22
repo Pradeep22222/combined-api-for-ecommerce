@@ -108,8 +108,8 @@ console.log("Cancel URL:", "https://" + process.env.CLIENT_ROOT_DOMAIN + "/payme
       billing_address_collection: "required",
       shipping_address_collection: { allowed_countries: ["AU"] },
       mode: "payment",
-      success_url: "https://pk-ecom-client.vercel.app/paymentsuccessful",
-      cancel_url: "https://pk-ecom-client.vercel.app/paymentfailed",
+success_url: "https://" + process.env.CLIENT_ROOT_DOMAIN + "/paymentsuccessful",
+cancel_url: "https://" + process.env.CLIENT_ROOT_DOMAIN + "/paymentfailed",
     });
 
     // Return session ID
