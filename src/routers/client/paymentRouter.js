@@ -99,7 +99,8 @@ router.post("/",userAuth, async (req, res, next) => {
         quantity: 1,
       });
     }
-
+console.log("Success URL:", "https://" + process.env.CLIENT_ROOT_DOMAIN + "/paymentsuccessful");
+console.log("Cancel URL:", "https://" + process.env.CLIENT_ROOT_DOMAIN + "/paymentfailed");
     // Create Stripe session for checkout
     const session = await stripeInitiation.checkout.sessions.create({
       payment_method_types: ["card", "afterpay_clearpay", "zip"],
@@ -107,8 +108,8 @@ router.post("/",userAuth, async (req, res, next) => {
       billing_address_collection: "required",
       shipping_address_collection: { allowed_countries: ["AU"] },
       mode: "payment",
-      success_url: "https://" + process.env.CLIENT_ROOT_DOMAIN + "/paymentsuccessful",
-      cancel_url: "https://" + process.env.CLIENT_ROOT_DOMAIN + "/paymentfailed",
+      success_url: "https://pk-ecom-client.vercel.app/paymentsuccessful",
+      cancel_url: "https://pk-ecom-client.vercel.app/paymentfailed",
     });
 
     // Return session ID
