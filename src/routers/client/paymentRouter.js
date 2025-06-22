@@ -112,7 +112,8 @@ router.post("/",userAuth, async (req, res, next) => {
     });
 
     // Return session ID
-    res.status(200).json({ sessionId: session.id });
+    res.status(200).json({ sessionId: session.id });  
+    
   } catch (error) {
     next(error);
   }
