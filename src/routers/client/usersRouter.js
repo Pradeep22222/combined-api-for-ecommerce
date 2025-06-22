@@ -43,7 +43,7 @@ router.post("/", async (req, res, next) => {
     //     message:
     //       "We have sent you an email to verify your account, please check your email including the junk folder",
     //   });
-    //   const url = `${process.env.ROOT_DOMAIN}/user/verify-email?c=${user.emailValidationCode}&e=${user.email}`;
+    //   const url = `${process.env.CLIENT_ROOT_DOMAIN}/user/verify-email?c=${user.emailValidationCode}&e=${user.email}`;
     //   verificationEmail({
     //     firstName: user.firstName,
     //     lastName: user.lastName,

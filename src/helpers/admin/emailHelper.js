@@ -49,11 +49,11 @@ export const userVerifiedNotification = (emailData) => {
     from: '"PK-ECOM 👻" <pradeepdhital124@gmail.com>', // sender address
     to: emailData.email, // list of receivers
     subject: "Account verified", // Subject line
-    text: `Hi ${emailData.firstName} Your account has been verified, you may login now ${process.env.ROOT_DOMAIN}`, // plain text body
+    text: `Hi ${emailData.firstName} Your account has been verified, you may login now ${process.env.ADMIN_ROOT_DOMAINN}`, // plain text body
     html: `<p> Hi ${emailData.firstName}</p>
     <br/>
     <br/>
-    <p> Your account has been verified, you may <a href="${process.env.ROOT_DOMAIN}">login</a> now.</p>
+    <p> Your account has been verified, you may <a href="${process.env.ADMIN_ROOT_DOMAIN}">login</a> now.</p>
     <br/>
     <br/>
     <br/>

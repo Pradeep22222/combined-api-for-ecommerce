@@ -74,7 +74,7 @@ router.post("/", newAdminUserValidation, async (req, res, next) => {
         message:
           "We have sent you an email to verify your account, please check your email including the junk folder",
       });
-      const url = `${process.env.ROOT_DOMAIN}/admin/verify-email?c=${user.emailValidationCode}&e=${user.email}`;
+      const url = `${process.env.ADMIN_ROOT_DOMAIN}/admin/verify-email?c=${user.emailValidationCode}&e=${user.email}`;
       console.log(url);
       // send email
       verificationEmail({

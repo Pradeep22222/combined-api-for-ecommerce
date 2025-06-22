@@ -107,8 +107,8 @@ router.post("/",userAuth, async (req, res, next) => {
       billing_address_collection: "required",
       shipping_address_collection: { allowed_countries: ["AU"] },
       mode: "payment",
-      success_url: process.env.ROOT_DOMAIN + "/paymentsuccessful",
-      cancel_url: process.env.ROOT_DOMAIN + "/paymentfailed",
+      success_url: "https://" + process.env.CLIENT_ROOT_DOMAIN + "/paymentsuccessful",
+      cancel_url: "https://" + process.env.CLIENT_ROOT_DOMAIN + "/paymentfailed",
     });
 
     // Return session ID
