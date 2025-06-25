@@ -8,7 +8,6 @@ const router = express.Router();
 // Webhook endpoint with raw middleware applied directly to this route
 router.post(
   "/",
-  express.raw({ type: "application/json" }),
   async (req, res) => {
     const sig = req.headers["stripe-signature"];
     let event;
