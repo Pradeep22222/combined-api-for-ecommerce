@@ -11,9 +11,8 @@ router.post(
   async (req, res) => {
     const sig = req.headers["stripe-signature"];
     let event;
-
+console.log("webhook page is triggered")
     try {
-      // Stripe needs the raw body to verify the webhook signature
       event = stripeWebhookInitiation.webhooks.constructEvent(
         req.body,
         sig,
@@ -23,7 +22,7 @@ router.post(
       console.log(`⚠️  Webhook signature verification failed:`, err.message);
       return res.sendStatus(400);
     }
-
+console.log("pradeep", event)
     // Handle the event
     switch (event.type) {
       case "checkout.session.completed": {
