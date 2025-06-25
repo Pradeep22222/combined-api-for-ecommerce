@@ -23,15 +23,18 @@ router.get("/", userAuth, async (req, res, next) => {
         carts.push(parsedItem);
       }
     }
+    
     carts.length >= 0 &&
       res.json({
         status: "success",
         message: "cart items are returned",
         carts,
       });
+     
   } catch (error) {
     next(error);
   }
+  
 });
 
 router.post("/", userAuth, async (req, res, next) => {

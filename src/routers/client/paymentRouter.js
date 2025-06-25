@@ -12,12 +12,12 @@ const gstRate = 0.1;
 
 router.post("/",userAuth, async (req, res, next) => {
   try {
-    const { products } = req.body;
+    const { items } = req.body;
     const fromPostCode = 6107; // Define your source post code
     const toPostCode = req.userInfo.address.postCode;
-
-    // Validate the products and get their dimensions asynchronously
-    const validationResult = await checkItemDetailsAndGetDimensions(products);
+    // Validate the items and get their dimensions asynchronously
+    const validationResult = await checkItemDetailsAndGetDimensions(items);
+   
     console.log(validationResult);
 
     if (!validationResult.success) {
@@ -28,54 +28,78 @@ router.post("/",userAuth, async (req, res, next) => {
     }
 
     // Extract the item details (dimensions) if validation is successful
-    const { itemDetails } = validationResult;
+    const { dimensions } = validationResult;
     // return;
     // Initialize total price and delivery variables
-    let totalPriceWithoutGST = 0;
-    let totalDeliveryFee = 0;
+  
 
-    // Calculate the total price of products and total delivery fee for each product
-    const productsWithDelivery = await Promise.all(
-      products.map(async (product, index) => {
-        const { length, height, width, weight } = itemDetails[index];
+  //   // Calculate the total price of products and total delivery fee for each product
+  //   const productsWithDelivery = await Promise.all(
+  // items.map(async (item, index) => {
+  //       const { length, height, width, weight } = itemDetails[index];
 
-        const deliveryDetails = await calculateDeliveryFee(
-          fromPostCode,
-          toPostCode,
-          { length, height, width }, // Pass dimensions object
-          weight
-        );
+  //       const deliveryDetails = await calculateDeliveryFee(
+  //         fromPostCode,
+  //         toPostCode,
+  //         { length, height, width }, // Pass dimensions object
+  //         weight
+  //       );
 
-        const productTotalPrice = product.price * product.count;
-        const productTotalDeliveryFee =
-          deliveryDetails.total_cost * product.count;
+  //       const productTotalPrice = item.price * item.count;
+  //       const productTotalDeliveryFee =
+  //         deliveryDetails.total_cost * item.count;
 
-        totalPriceWithoutGST += productTotalPrice;
-        totalDeliveryFee += productTotalDeliveryFee;
+  //       totalPriceWithoutGST += productTotalPrice;
+  //       totalDeliveryFee += productTotalDeliveryFee;
 
-        return {
-          ...product,
-          productTotalPrice,
-          productTotalDeliveryFee,
-        };
-      })
-    );
+  //       return {
+  //         ...item,
+  //         productTotalPrice,
+  //         productTotalDeliveryFee,
+  //       };
+  //     })
+  //   );
+// 1. Calculate delivery fee once based on combined dimension
+const deliveryDetails = await calculateDeliveryFee(
+  fromPostCode,
+  toPostCode,
+  {
+    length: dimensions.length,
+    height: dimensions.height,
+    width: dimensions.width,
+  },
+  dimensions.weight
+);
+console.log(deliveryDetails);
+const totalDeliveryFee = Number(deliveryDetails.total_cost).toFixed(2);
 
+// 2. Calculate total product price and prepare line items
+let totalPriceWithoutGST = 0;
+
+const productsWithDelivery = items.map((item) => {
+  const productTotalPrice = item.price * item.count;
+  totalPriceWithoutGST += productTotalPrice;
+
+  return {
+    ...item,
+    productTotalPrice,
+  };
+});
     // Calculate GST based on total price + total delivery fee
     const totalBeforeGST = totalPriceWithoutGST + totalDeliveryFee;
     const gstAmount = Math.ceil(gstRate * totalBeforeGST);
 
     // Prepare line items for Stripe payment
-    const lineItems = productsWithDelivery.map((product) => ({
+    const lineItems = productsWithDelivery.map((item) => ({
       price_data: {
         currency: "aud",
         product_data: {
-          name: product.name,
-          images: [product.thumbnail],
+          name: item.name,
+          images: [item.thumbnail],
         },
-        unit_amount: Math.round(product.price * 100),
+        unit_amount: Math.round(item.price * 100),
       },
-      quantity: product.count,
+      quantity: item.count,
     }));
 
     // Push GST as a separate line item

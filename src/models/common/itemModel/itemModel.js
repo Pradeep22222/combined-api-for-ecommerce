@@ -1,3 +1,4 @@
+import { calculateDimensionsAndWeight } from "../../../helpers/client/calculateDimensionAndWeight.js";
 import itemSchema from "./itemSchema.js";
 
 
@@ -63,55 +64,50 @@ export const checkItemDetailsAndGetDimensions = async (items) => {
     for (let i = 0; i < items.length; i++) {
       const { name, _id, price, count } = items[i];
 
-      // Find the product by its ID
-      const product = await itemSchema.findById(_id);
-
-      if (!product) {
+      const item = await itemSchema.findById(_id);
+      if (!item) {
         return { success: false, message: `${name} is not available anymore` };
       }
 
-      // Check if the item status is inactive
-      if (product.status === "inactive") {
+      if (item.status === "inactive") {
         return {
           success: false,
           message: `${name} is not available at the moment`,
         };
       }
 
-      // Check if the count matches the available stock
-      const isCountValid = count <= product.quantity;
-      if (!isCountValid) {
+      if (count > item.quantity) {
         return {
           success: false,
-          message: `Available stock for ${name} is only ${product.quantity}`,
+          message: `Available stock for ${name} is only ${item.quantity}`,
         };
       }
 
-      // Check if the price matches
-      const isPriceMatch = product.price === price;
-      if (!isPriceMatch) {
+      if (item.price !== price) {
         return {
           success: false,
           message: `Price didn't match for ${name}`,
         };
       }
 
-      // If validation passed, push the product dimensions into the array
       itemDetails.push({
-        length: product.length,
-        height: product.height,
-        width: product.width,
-        weight: product.weight,
+        length: item.length,
+        height: item.height,
+        width: item.width,
+        weight: item.weight,
+        count: Number(count), // ensure count is numeric
       });
     }
 
-    // If all products are valid, return their dimensions
-    return { success: true, itemDetails };
+    // ✅ Now calculate dimensions and weight
+    const dimensions = calculateDimensionsAndWeight(itemDetails);
+
+    return { success: true, dimensions, itemDetails };
   } catch (error) {
-    console.error("Error checking product details:", error);
+    console.error("Error checking items details:", error);
     return {
       success: false,
-      message: "An error occurred while checking product details",
+      message: "An error occurred while checking items details",
     };
   }
 };
