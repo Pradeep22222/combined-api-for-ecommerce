@@ -14,8 +14,8 @@ dbConnection();
 
 // 📦 Stripe Webhook (MUST be before express.json)
 import stripeHook from "./src/routers/client/stripeWebHooks.js";
-app.use("/api/v1/stripe/webhook", express.raw({ type: "application/json" }));
-app.use("/api/v1/stripe/webhook", stripeHook);
+app.use("/api/v1/client/stripewebhook", express.raw({ type: "application/json" }));
+app.use("/api/v1/client/stripewebhook", stripeHook);
 
 // 🌐 Middleware
 app.use(cors());
