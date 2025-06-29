@@ -4,7 +4,7 @@ import { userAuth } from "../../middlewares/client/authMiddleware.js";
 import { checkItemDetailsAndGetDimensions } from "../../models/common/itemModel/itemModel.js";
 import { calculateDeliveryFee } from "../../helpers/client/auPostAPI.js";
 
-const stripeInitiation = stripe(process.env.STRIPE_SECRET);
+const stripeInit = stripe(process.env.STRIPE_SECRET);
 const router = express.Router();
 const GST_RATE = 0.1;
 
@@ -14,43 +14,41 @@ router.post("/", userAuth, async (req, res, next) => {
     const user = req.userInfo;
     const address = user.address;
 
-    const fromPostCode = 6107;
-    const toPostCode = address.postCode;
-
-    const validationResult = await checkItemDetailsAndGetDimensions(items);
-    if (!validationResult.success) {
-      return res.status(400).json({ status: "error", message: validationResult.message });
+    const validation = await checkItemDetailsAndGetDimensions(items);
+    if (!validation.success) {
+      return res.status(400).json({ status: "error", message: validation.message });
     }
 
-    const { length, height, width, weight } = validationResult.dimensions;
+    const { length, height, width, weight } = validation.dimensions;
+    const delivery = await calculateDeliveryFee(6107, address.postCode, { length, height, width }, weight);
+    const deliveryCost = Number(delivery.total_cost);
 
-    const deliveryDetails = await calculateDeliveryFee(fromPostCode, toPostCode, { length, height, width }, weight);
-    const totalDeliveryFee = Number(deliveryDetails.total_cost);
+    let subtotal = 0;
 
-    let totalPriceWithoutGST = 0;
-    const productsWithDelivery = items.map((item) => {
-      const productTotalPrice = item.price * item.count;
-      totalPriceWithoutGST += productTotalPrice;
-      return { ...item, productTotalPrice };
-    });
+    const productLineItems = items.map((item) => {
+      const itemSubtotal = item.price * item.count;
+      subtotal += itemSubtotal;
 
-    const gstAmount = GST_RATE * totalPriceWithoutGST;
-
-    const lineItems = [
-      ...productsWithDelivery.map((item) => ({
+      return {
         price_data: {
           currency: "aud",
           product_data: {
             name: item.name,
             images: [item.thumbnail],
             metadata: {
-              itemId: item._id.toString(), // Store MongoDB _id here
+              itemId: item._id, // Pass your DB item ID here
             },
           },
           unit_amount: Math.round(item.price * 100),
         },
         quantity: item.count,
-      })),
+      };
+    });
+
+    const gstAmount = subtotal * GST_RATE;
+
+    const lineItems = [
+      ...productLineItems,
       {
         price_data: {
           currency: "aud",
@@ -61,12 +59,12 @@ router.post("/", userAuth, async (req, res, next) => {
       },
     ];
 
-    if (totalDeliveryFee > 0) {
+    if (deliveryCost > 0) {
       lineItems.push({
         price_data: {
           currency: "aud",
           product_data: { name: "Delivery Charge" },
-          unit_amount: Math.round(totalDeliveryFee * 100),
+          unit_amount: Math.round(deliveryCost * 100),
         },
         quantity: 1,
       });
@@ -81,17 +79,14 @@ router.post("/", userAuth, async (req, res, next) => {
       country: "AU",
     };
 
-    const customer = await stripeInitiation.customers.create({
+    const customer = await stripeInit.customers.create({
       name: fullName,
       email: user.email,
       address: shippingAddress,
-      shipping: {
-        name: fullName,
-        address: shippingAddress,
-      },
+      shipping: { name: fullName, address: shippingAddress },
     });
 
-    const session = await stripeInitiation.checkout.sessions.create({
+    const session = await stripeInit.checkout.sessions.create({
       customer: customer.id,
       payment_method_types: ["card", "afterpay_clearpay", "zip"],
       line_items: lineItems,
@@ -102,9 +97,8 @@ router.post("/", userAuth, async (req, res, next) => {
     });
 
     res.status(200).json({ sessionId: session.id });
-
-  } catch (error) {
-    next(error);
+  } catch (err) {
+    next(err);
   }
 });
 

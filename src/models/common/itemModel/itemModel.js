@@ -117,29 +117,18 @@ export const checkItemDetailsAndGetDimensions = async (items) => {
 export const decreaseItemQuantity = async (itemId, count) => {
   try {
     const item = await itemSchema.findById(itemId);
+    if (!item) return { success: false, message: "Item not found" };
 
-    // Check if item exists and has enough stock
-    if (item && item.quantity >= count) {
-      // Decrease the item quantity
-      item.quantity -= count;
+    if (item.quantity < count) return { success: false, message: "Insufficient stock" };
 
-      // Check if the quantity goes to 0 or below and set status to "inactive"
-      if (item.quantity <= 0) {
-        item.status = "inactive";
-      }
+    item.quantity -= count;
+    if (item.quantity <= 0) item.status = "inactive";
 
-      // Save the updated item
-      await item.save();
-
-      return { success: true };
-    } else {
-      return { success: false, message: "Insufficient stock" };
-    }
-  } catch (error) {
-    console.error("Error decreasing item quantity:", error);
-    return {
-      success: false,
-      message: "Failed to update item quantity on purchase",
-    };
+    await item.save();
+    return { success: true };
+  } catch (err) {
+    console.error("Error updating item quantity:", err);
+    return { success: false, message: "Failed to update item quantity" };
   }
 };
+
