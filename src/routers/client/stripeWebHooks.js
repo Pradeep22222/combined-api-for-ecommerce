@@ -9,7 +9,7 @@ router.post("/", express.raw({ type: "application/json" }), async (req, res) => 
   const sig = req.headers["stripe-signature"];
   let event;
 
-  console.log("webhook page is triggered");
+  console.log("Webhook triggered");
 
   try {
     event = stripeWebhookInitiation.webhooks.constructEvent(
@@ -18,11 +18,9 @@ router.post("/", express.raw({ type: "application/json" }), async (req, res) => 
       process.env.STRIPE_WEBHOOK_SECRET
     );
   } catch (err) {
-    console.log("⚠️  Webhook signature verification failed:", err.message);
+    console.error("⚠️ Webhook signature verification failed:", err.message);
     return res.sendStatus(400);
   }
-
-  console.log("pradeep", event);
 
   switch (event.type) {
     case "checkout.session.completed": {
@@ -32,15 +30,24 @@ router.post("/", express.raw({ type: "application/json" }), async (req, res) => 
       try {
         const lineItems = await stripeWebhookInitiation.checkout.sessions.listLineItems(
           session.id,
-          { limit: 100 }
+          {
+            limit: 100,
+            expand: ["data.price.product"], // Important to get metadata
+          }
         );
 
         console.log("Retrieved line items:", lineItems);
 
-        const products = lineItems.data.map((item) => ({
-          _id: item.price.product, // This assumes `product` in Stripe matches MongoDB `_id`
-          count: item.quantity,
-        }));
+        const products = lineItems.data
+          .map((item) => {
+            const itemId = item.price.product.metadata?.itemId;
+            if (!itemId) return null;
+            return {
+              _id: itemId,
+              count: item.quantity,
+            };
+          })
+          .filter(Boolean); // Remove null entries
 
         if (products.length > 0) {
           await Promise.all(
@@ -50,7 +57,7 @@ router.post("/", express.raw({ type: "application/json" }), async (req, res) => 
           );
           console.log("Product quantities have been updated successfully.");
         } else {
-          console.warn("No products found in line items.");
+          console.warn("No valid products with itemId found in line items.");
         }
       } catch (error) {
         console.error("Error processing line items or updating quantity:", error);

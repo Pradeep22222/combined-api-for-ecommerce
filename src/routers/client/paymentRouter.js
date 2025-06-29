@@ -40,7 +40,13 @@ router.post("/", userAuth, async (req, res, next) => {
       ...productsWithDelivery.map((item) => ({
         price_data: {
           currency: "aud",
-          product_data: { name: item.name, images: [item.thumbnail] },
+          product_data: {
+            name: item.name,
+            images: [item.thumbnail],
+            metadata: {
+              itemId: item._id.toString(), // Store MongoDB _id here
+            },
+          },
           unit_amount: Math.round(item.price * 100),
         },
         quantity: item.count,
