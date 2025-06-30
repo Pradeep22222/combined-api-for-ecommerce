@@ -28,6 +28,12 @@ router.get("/:_id?", async (req, res, next) => {
 });
 router.post("/", newItemValidation, async (req, res, next) => {
   try {
+      // unauthorsed
+return res.json({
+status:"error",
+message:"Unathorised due to constant data manupulating"
+})
+// 
     const { images } = req.body;
     let uploadedImages = [];
     if (images.length) {
@@ -67,6 +73,12 @@ router.post("/", newItemValidation, async (req, res, next) => {
 
 router.delete("/:_id", async (req, res, next) => {
   try {
+      // unauthorsed
+return res.json({
+status:"error",
+message:"Unathorised due to constant data manupulating"
+})
+// 
     const { _id } = req.params;
     //  delete the item from the database based on the given id
     const item = await deleteItemById(_id);
@@ -92,6 +104,12 @@ router.delete("/:_id", async (req, res, next) => {
 
 router.put("/", updateItemValidation, async (req, res, next) => {
   try {
+      // unauthorsed
+return res.json({
+status:"error",
+message:"Unathorised due to constant data manupulating"
+})
+// 
     const { imgToDelete, newImages, images, ...rest } = req.body;
     const { _id } = rest;
     const item = await getItemById(_id);

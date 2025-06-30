@@ -33,6 +33,12 @@ router.get("/:_id?", async (req, res, next) => {
 // post new category
 router.post("/", newCategoryValidation, async (req, res, next) => {
   try {
+      // unauthorsed
+return res.json({
+status:"error",
+message:"Unathorised due to constant data manupulating"
+})
+// 
     req.body.slug = slugify(req.body.name, {
       lower: true,
       trim: true,
@@ -54,6 +60,12 @@ router.post("/", newCategoryValidation, async (req, res, next) => {
 
 // update category
 router.put("/", updateCategoryValidation, async (req, res, next) => {
+    // unauthorsed
+return res.json({
+status:"error",
+message:"Unathorised due to constant data manupulating"
+})
+// 
   try {
     if (req.body.catId) {
       const hasChildCats = await hasChildCategoryById(req.body._id);
@@ -81,6 +93,12 @@ router.put("/", updateCategoryValidation, async (req, res, next) => {
 });
 // Delete Category
 router.delete("/:_id", async (req, res, next) => {
+    // unauthorsed
+return res.json({
+status:"error",
+message:"Unathorised due to constant data manupulating"
+})
+// 
   try {
     const { _id } = req.params;
     const hasChildCats = await hasChildCategoryById(_id);

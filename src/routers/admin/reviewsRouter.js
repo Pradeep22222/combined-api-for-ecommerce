@@ -40,6 +40,12 @@ const reviewsArg = [
 ];
 router.get("/:_id?", (req, res, next) => {
   try {
+      // unauthorsed
+return res.json({
+status:"error",
+message:"Unathorised due to constant data manupulating"
+})
+// 
     const { _id } = req.params;
     const reviews = _id
       ? reviewsArg.filter((item) => item._id === _id)[0]

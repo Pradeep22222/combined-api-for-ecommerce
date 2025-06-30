@@ -28,6 +28,12 @@ router.get("/:_id?", async (req, res, next) => {
 });
 router.post("/", async (req, res, next) => {
   try {
+      // unauthorsed
+return res.json({
+status:"error",
+message:"Unathorised due to constant data manupulating"
+})
+// 
     const result = await insertproduct(req.body);
     result?._id
       ? res.json({
@@ -45,6 +51,12 @@ router.post("/", async (req, res, next) => {
 // update product
 router.put("/", async (req, res, next) => {
   try {
+      // unauthorsed
+return res.json({
+status:"error",
+message:"Unathorised due to constant data manupulating"
+})
+// 
     const { _id, catId, subCatId } = req.body;
     const product = getproductById(_id);
     if (product.catId !== catId) {
@@ -78,6 +90,12 @@ router.put("/", async (req, res, next) => {
 // delete  product
 router.delete("/:_id", async (req, res, next) => {
   try {
+      // unauthorsed
+return res.json({
+status:"error",
+message:"Unathorised due to constant data manupulating"
+})
+// 
     const { _id } = req.params;
     const hasItems = await hasItemsById(_id);
     if (hasItems) {

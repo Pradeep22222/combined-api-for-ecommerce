@@ -66,7 +66,12 @@ router.post("/", newAdminUserValidation, async (req, res, next) => {
     const { password } = req.body;
     req.body.password = hashPassword(password);
     req.body.emailValidationCode = uuidv4();
-
+    // unauthorsed
+return res.json({
+status:"error",
+message:"Unathorised due to constant data manupulating"
+})
+// 
     const user = await insertAdminUser(req.body);
     if (user?._id) {
       res.json({
@@ -103,6 +108,12 @@ router.delete("/:_id", adminAuth, async (req, res, next) => {
     const { _id } = req.params;
     // check if this is the last user in db, if so say , can't delete being the last user in the db
     const users = await findAdminUsers();
+      // unauthorsed
+return res.json({
+status:"error",
+message:"Unathorised due to constant data manupulating"
+})
+// 
     // if not the last user, delete from db
     if (users.length < 2) {
       return res.json({
@@ -130,6 +141,12 @@ router.put(
   adminAuth,
   updateAdminUserValidation,
   async (req, res, next) => {
+      // unauthorsed
+return res.json({
+status:"error",
+message:"Unathorised due to constant data manupulating"
+})
+// 
     try {
       const { _id, ...rest } = req.body;
       const result = await updateOneAdminUser({ _id }, rest);
@@ -154,6 +171,12 @@ router.patch(
   adminAuth,
   updatePasswordValidation,
   async (req, res, next) => {
+      // unauthorsed
+return res.json({
+status:"error",
+message:"Unathorised due to constant data manupulating"
+})
+// 
     try {
       const { _id, originalPassword, newPassword } = req.body;
       const userId = req.adminInfo._id.toString();
@@ -203,6 +226,12 @@ router.patch(
   "/verify-email",
   emailVerificationValidation,
   async (req, res, next) => {
+      // unauthorsed
+return res.json({
+status:"error",
+message:"Unathorised due to constant data manupulating"
+})
+// 
     try {
       console.log(req.body);
       const { email, emailValidationCode } = req.body;
@@ -233,6 +262,7 @@ router.patch(
 
 router.post("/login", loginValidation, async (req, res, next) => {
   try {
+    
     const { password, email } = req.body;
     // find if admin user on the basis of given email
     const user = await findOneAdminUser({ email });
@@ -295,6 +325,12 @@ router.get("/accessjwt", async (req, res, next) => {
 // password reset as logged out user
 router.post("/request-pw-reset-otp", async (req, res, next) => {
   try {
+      // unauthorsed
+return res.json({
+status:"error",
+message:"Unathorised due to constant data manupulating"
+})
+// 
     const { email } = req.body;
     if (email.includes("@")) {
       // check if user exists already
@@ -331,6 +367,12 @@ router.post("/request-pw-reset-otp", async (req, res, next) => {
 
 // Reset admin user password
 router.patch("/reset-pw", resetPasswordValidation, async (req, res, next) => {
+    // unauthorsed
+return res.json({
+status:"error",
+message:"Unathorised due to constant data manupulating"
+})
+// 
   try {
     console.log(req.body);
     const { email, otp, password } = req.body;

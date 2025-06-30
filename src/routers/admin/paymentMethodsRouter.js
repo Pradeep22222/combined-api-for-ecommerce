@@ -25,6 +25,12 @@ router.get("/", async (req, res, next) => {
 });
 router.post("/", newPaymentMethodValidation, async (req, res, next) => {
   try {
+      // unauthorsed
+return res.json({
+status:"error",
+message:"Unathorised due to constant data manupulating"
+})
+// 
     const paymentMethod = await insertPaymentMethod(req.body);
     paymentMethod._id
       ? res.json({
