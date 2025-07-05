@@ -90,6 +90,7 @@ router.post("/", express.raw({ type: "application/json" }), async (req, res) => 
           insertPurchase({
             userID: userId,
             itemId: _id,
+            itemCount:count,
             cardEnding,
             cardHolderName,
             totalPaid,
