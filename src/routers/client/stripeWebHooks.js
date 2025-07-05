@@ -43,8 +43,9 @@ router.post("/", express.raw({ type: "application/json" }), async (req, res) => 
 
       await Promise.all(
         // products.map(({ _id, count }) => decreaseItemQuantity(_id, count))
-        console.log("item count decreased locally")
+        
       );
+      console.log("item count decreased locally")
       console.log("purchases:session",session)
       console.log("purchases:products",products)
     } catch (err) {
