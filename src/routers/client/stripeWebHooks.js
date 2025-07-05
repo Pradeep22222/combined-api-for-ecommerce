@@ -23,10 +23,16 @@ router.post("/", express.raw({ type: "application/json" }), async (req, res) => 
 
   if (event.type === "checkout.session.completed") {
     const session = event.data.object;
+    console.log("💬 Stripe session object:", session);
+
     const userId = session.metadata?.userId;
 
     try {
-      // 1️⃣ Fetch line items with expanded product data
+      if (!session.payment_intent) {
+        throw new Error("Missing payment_intent in session");
+      }
+
+      // Fetch line items with expanded product data
       const { data: items } = await stripeWebhook.checkout.sessions.listLineItems(session.id, {
         limit: 100,
         expand: ["data.price.product"],
@@ -45,14 +51,20 @@ router.post("/", express.raw({ type: "application/json" }), async (req, res) => 
         return res.sendStatus(200);
       }
 
-      // 2️⃣ Decrease item quantities in DB
-      // await Promise.all(products.map(({ _id, count }) => decreaseItemQuantity(_id, count)));
-      // console.log("✅ Item quantities decreased.");
-
-      // 3️⃣ Retrieve payment details
+      // Retrieve paymentIntent with charges expanded
       const paymentIntent = await stripeWebhook.paymentIntents.retrieve(session.payment_intent, {
-  expand: ['charges.data']
-});
+        expand: ["charges.data"],
+      });
+      console.log("💬 PaymentIntent object:", paymentIntent);
+
+      if (
+        !paymentIntent.charges ||
+        !paymentIntent.charges.data ||
+        paymentIntent.charges.data.length === 0
+      ) {
+        throw new Error("No charges found in paymentIntent");
+      }
+
       const charge = paymentIntent.charges.data[0];
       const paymentMethod = charge.payment_method_details.card;
       const cardEnding = paymentMethod.last4;
@@ -61,7 +73,7 @@ router.post("/", express.raw({ type: "application/json" }), async (req, res) => 
       const timePlaced = new Date();
       const orderNumber = session.id;
 
-      // 4️⃣ Retrieve customer info to get delivery address
+      // Retrieve customer to get delivery address
       const customer = await stripeWebhook.customers.retrieve(session.customer);
       const deliveryAddr = customer?.shipping?.address || customer?.address;
       const deliveryAddress = deliveryAddr
@@ -70,7 +82,11 @@ router.post("/", express.raw({ type: "application/json" }), async (req, res) => 
             .join(", ")
         : "Unknown Address";
 
-      // 5️⃣ Insert purchase records into DB
+      // Decrease item quantities in your DB
+      await Promise.all(products.map(({ _id, count }) => decreaseItemQuantity(_id, count)));
+      console.log("✅ Item quantities decreased.");
+
+      // Insert purchase records
       await Promise.all(
         products.map(({ _id, itemPrice, count }) =>
           insertPurchase({
@@ -88,7 +104,7 @@ router.post("/", express.raw({ type: "application/json" }), async (req, res) => 
         )
       );
 
-      console.log("✅ Purchases successfully saved to database.");
+      console.log("✅ Purchases saved successfully.");
     } catch (err) {
       console.error("❌ Error processing purchase records:", err);
     }
