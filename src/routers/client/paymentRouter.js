@@ -95,7 +95,7 @@ router.post("/", userAuth, async (req, res, next) => {
       success_url: `https://${process.env.CLIENT_ROOT_DOMAIN}/paymentsuccessful`,
       cancel_url: `https://${process.env.CLIENT_ROOT_DOMAIN}/paymentfailed`,
     });
-
+    
     res.status(200).json({ sessionId: session.id });
   } catch (err) {
     next(err);

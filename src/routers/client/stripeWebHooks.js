@@ -42,9 +42,11 @@ router.post("/", express.raw({ type: "application/json" }), async (req, res) => 
       }
 
       await Promise.all(
-        products.map(({ _id, count }) => decreaseItemQuantity(_id, count))
+        // products.map(({ _id, count }) => decreaseItemQuantity(_id, count))
+        console.log("item count decreased locally")
       );
-      console.log("✅ Product quantities updated.");
+      console.log("purchases:session",session)
+      console.log("purchases:products",products)
     } catch (err) {
       console.error("❌ Error processing line items:", err);
     }
