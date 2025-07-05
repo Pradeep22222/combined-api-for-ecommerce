@@ -36,7 +36,8 @@ router.post("/", userAuth, async (req, res, next) => {
             name: item.name,
             images: [item.thumbnail],
             metadata: {
-              itemId: item._id, // Pass your DB item ID here
+              itemId: item._id, 
+              userId:req.userInfo._id
             },
           },
           unit_amount: Math.round(item.price * 100),
@@ -94,6 +95,9 @@ router.post("/", userAuth, async (req, res, next) => {
       mode: "payment",
       success_url: `https://${process.env.CLIENT_ROOT_DOMAIN}/paymentsuccessful`,
       cancel_url: `https://${process.env.CLIENT_ROOT_DOMAIN}/paymentfailed`,
+       metadata: {
+    userId: user._id.toString(),  
+  },
     });
 
     res.status(200).json({ sessionId: session.id });
