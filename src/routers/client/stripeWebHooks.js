@@ -50,7 +50,9 @@ router.post("/", express.raw({ type: "application/json" }), async (req, res) => 
       // console.log("✅ Item quantities decreased.");
 
       // 3️⃣ Retrieve payment details
-      const paymentIntent = await stripeWebhook.paymentIntents.retrieve(session.payment_intent);
+      const paymentIntent = await stripeWebhook.paymentIntents.retrieve(session.payment_intent, {
+  expand: ['charges.data']
+});
       const charge = paymentIntent.charges.data[0];
       const paymentMethod = charge.payment_method_details.card;
       const cardEnding = paymentMethod.last4;
