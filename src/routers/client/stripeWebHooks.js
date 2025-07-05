@@ -28,11 +28,7 @@ router.post("/", express.raw({ type: "application/json" }), async (req, res) => 
     const userId = session.metadata?.userId;
 
     try {
-      if (!session.payment_intent) {
-        throw new Error("Missing payment_intent in session");
-      }
-
-      // Fetch line items with expanded product data
+      // 1️⃣ List line items with product metadata
       const { data: items } = await stripeWebhook.checkout.sessions.listLineItems(session.id, {
         limit: 100,
         expand: ["data.price.product"],
@@ -51,21 +47,17 @@ router.post("/", express.raw({ type: "application/json" }), async (req, res) => 
         return res.sendStatus(200);
       }
 
-      // Retrieve paymentIntent with charges expanded
-      const paymentIntent = await stripeWebhook.paymentIntents.retrieve(session.payment_intent, {
-        expand: ["charges.data"],
-      });
+      // 2️⃣ Get payment intent
+      const paymentIntent = await stripeWebhook.paymentIntents.retrieve(session.payment_intent);
       console.log("💬 PaymentIntent object:", paymentIntent);
 
-      if (
-        !paymentIntent.charges ||
-        !paymentIntent.charges.data ||
-        paymentIntent.charges.data.length === 0
-      ) {
-        throw new Error("No charges found in paymentIntent");
+      if (!paymentIntent.latest_charge) {
+        throw new Error("No latest_charge found in paymentIntent");
       }
 
-      const charge = paymentIntent.charges.data[0];
+      // 3️⃣ Retrieve charge to get card info
+      const charge = await stripeWebhook.charges.retrieve(paymentIntent.latest_charge);
+
       const paymentMethod = charge.payment_method_details.card;
       const cardEnding = paymentMethod.last4;
       const cardHolderName = charge.billing_details.name;
@@ -73,20 +65,26 @@ router.post("/", express.raw({ type: "application/json" }), async (req, res) => 
       const timePlaced = new Date();
       const orderNumber = session.id;
 
-      // Retrieve customer to get delivery address
-      const customer = await stripeWebhook.customers.retrieve(session.customer);
-      const deliveryAddr = customer?.shipping?.address || customer?.address;
+      // 4️⃣ Get address from session or customer details
+      const deliveryAddr = session.customer_details?.address;
       const deliveryAddress = deliveryAddr
-        ? [deliveryAddr.line1, deliveryAddr.city, deliveryAddr.state, deliveryAddr.postal_code, deliveryAddr.country]
+        ? [
+            deliveryAddr.line1,
+            deliveryAddr.line2,
+            deliveryAddr.city,
+            deliveryAddr.state,
+            deliveryAddr.postal_code,
+            deliveryAddr.country,
+          ]
             .filter(Boolean)
             .join(", ")
         : "Unknown Address";
 
-      // Decrease item quantities in your DB
+      // 5️⃣ Decrease stock
       await Promise.all(products.map(({ _id, count }) => decreaseItemQuantity(_id, count)));
       console.log("✅ Item quantities decreased.");
 
-      // Insert purchase records
+      // 6️⃣ Save purchases
       await Promise.all(
         products.map(({ _id, itemPrice, count }) =>
           insertPurchase({
