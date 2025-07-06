@@ -38,8 +38,11 @@ router.post("/", express.raw({ type: "application/json" }), async (req, res) => 
         .map(({ price, quantity }) => {
           const itemId = price.product.metadata?.itemId;
           const itemPrice = price.unit_amount / 100;
-          return itemId ? { _id: itemId, count: quantity, itemPrice } : null;
+          const image = price.product.images?.[0];
+          return itemId ? { _id: itemId, count: quantity, itemPrice ,image} : null;
+        
         })
+        
         .filter(Boolean);
 
       if (!products.length) {
@@ -64,7 +67,7 @@ router.post("/", express.raw({ type: "application/json" }), async (req, res) => 
       const totalPaid = session.amount_total / 100;
       const timePlaced = new Date();
       const orderNumber = session.id;
-
+    
       // 4️⃣ Get address from session or customer details
       const deliveryAddr = session.customer_details?.address;
       const deliveryAddress = deliveryAddr
@@ -86,10 +89,11 @@ router.post("/", express.raw({ type: "application/json" }), async (req, res) => 
 
       // 6️⃣ Save purchases
       await Promise.all(
-        products.map(({ _id, itemPrice, count }) =>
+        products.map(({ _id, itemPrice, count,image }) =>
           insertPurchase({
             userId,
             itemId: _id,
+            image,
             itemCount:count,
             cardEnding,
             cardHolderName,

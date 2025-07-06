@@ -10,6 +10,10 @@ const purchasesSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       required: true,
     },
+    image: {
+         type: String ,
+required:true,
+    },
     itemCount:{
         type:Number,
         required:true
