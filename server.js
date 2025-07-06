@@ -36,6 +36,7 @@ import clientUsersRouter from "./src/routers/client/usersRouter.js";
 import cartRouter from "./src/routers/client/cartRouter.js";
 import favRouter from "./src/routers/client/favRouter.js";
 import paymentRouter from "./src/routers/client/paymentRouter.js";
+import purchasesRouter from "./src/routers/client/purchasesRouter.js";
 import australiaPost from "./src/routers/client/australiaPost.js";
 
 app.use("/api/v1/client/categories", clientCategoriesRouter);
@@ -44,6 +45,7 @@ app.use("/api/v1/client/items", clientItemsRouter);
 app.use("/api/v1/client/users", clientUsersRouter);
 app.use("/api/v1/client/cart", cartRouter);
 app.use("/api/v1/client/favs", favRouter);
+app.use("/api/v1/client/purchases", purchasesRouter);
 app.use("/api/v1/client/payment", paymentRouter);
 app.use("/api/v1/client/delivery", australiaPost);
 

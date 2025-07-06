@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 
 const purchasesSchema = new mongoose.Schema(
   {
-    userID: {
+    userId: {
       type: mongoose.Schema.Types.ObjectId,
       required: true,
     },

@@ -88,7 +88,7 @@ router.post("/", express.raw({ type: "application/json" }), async (req, res) => 
       await Promise.all(
         products.map(({ _id, itemPrice, count }) =>
           insertPurchase({
-            userID: userId,
+            userId,
             itemId: _id,
             itemCount:count,
             cardEnding,
