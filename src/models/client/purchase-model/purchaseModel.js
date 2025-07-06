@@ -5,5 +5,5 @@ export const insertPurchase = (obj) => {
 };
 
 export const getAllPurchasesItems = (_id) => {
-  return purchasesSchema.find({ userID: _id });
+  return purchasesSchema.find({ userId: _id });
 };
