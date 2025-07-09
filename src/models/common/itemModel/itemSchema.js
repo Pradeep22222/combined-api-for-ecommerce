@@ -1,6 +1,13 @@
 import mongoose from "mongoose";
 const itemSchema = new mongoose.Schema(
   {
+      filterName:{
+    type:String,
+    required:false,
+    },
+    filters:[
+    
+String],
     status: {
       type: String,
       default: "inactive",
