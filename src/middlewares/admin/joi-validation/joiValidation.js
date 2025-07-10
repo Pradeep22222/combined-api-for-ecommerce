@@ -173,6 +173,13 @@ export const updateItemValidation = (req, res, next) => {
     description: LONGSTR.required(),
     quantity: NUMBER.required(),
     price: NUMBER.required(),
+    length: NUMBER.required(),
+    width: NUMBER.required(),
+    height: NUMBER.required(),
+    weight: NUMBER.required(),
+    fromSuburb: LONGSTR.required(),
+    fromState: SHORTSTR.required(),
+    fromPostCode: NUMBER.required(),
     salesPrice: NUMBER,
     salesStartDate: DATE.allow(null),
     salesEndDate: DATE.allow(null),
@@ -183,6 +190,9 @@ export const updateItemValidation = (req, res, next) => {
     thumbnail: LONGSTR.required(),
     imgToDelete: Joi.array(),
     newImages: Joi.array(),
+    filterName: SHORTSTR.allow(""),
+    filters: Joi.array(),
   });
+
   validator(schema, req, res, next);
 };

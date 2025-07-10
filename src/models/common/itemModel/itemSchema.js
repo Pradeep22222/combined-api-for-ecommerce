@@ -60,11 +60,6 @@ String],
       required: true,
       default: "",
     },
-    fromState: {
-      type: String,
-      required: true,
-      default: "",
-    },
     fromPostCode: {
       type: Number,
       required: true,
