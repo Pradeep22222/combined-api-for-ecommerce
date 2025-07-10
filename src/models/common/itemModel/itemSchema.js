@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 const itemSchema = new mongoose.Schema(
   {
-      filterName:{
+     filterName:{
     type:String,
     required:false,
     },
