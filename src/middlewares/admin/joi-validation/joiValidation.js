@@ -143,6 +143,7 @@ export const newItemValidation = (req, res, next) => {
     height: NUMBER.required(),
     weight: NUMBER.required(),
     fromSuburb: LONGSTR.required(),
+    fromPostCode: NUMBER.required(),
     salesPrice: NUMBER,
     salesStartDate: DATE.allow(null),
     salesEndDate: DATE.allow(null),
